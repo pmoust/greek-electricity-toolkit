@@ -10,7 +10,7 @@ Three demo supplies, all currently on **floating** products (effective €0,155�
 |---|---:|---:|---:|---:|
 | All 3 demo supplies (2 months each) | **€1.079,65** | **€985,79** | **€93,86** | **8,7%** |
 
-Annualised ≈ **~€560/year**. Biggest levers: the common-areas business supply and the low-consumption apartment.
+Biggest levers: the common-areas business supply and the low-consumption apartment. *(These are 2-month, spring-only samples — per the method we deliberately do **not** extrapolate to a naive annual figure; summer A/C and winter heating aren't represented. Use ≥12 months for an annual estimate.)*
 
 ## Recommendation per supply
 

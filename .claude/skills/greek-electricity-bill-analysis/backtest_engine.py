@@ -110,8 +110,10 @@ def commitment_tier(offer):
     Floating and fixed-of-different-terms are NOT interchangeable -- decide the
     tier first, then compare price within it. Returns one of:
     'floating', 'fixed-<=12m', 'fixed-13-24m', 'fixed->24m'."""
-    is_fixed = offer.get("color") == "Blue" or "fixed" in str(offer.get("type", "")) \
-        or not offer.get("adj_clause", True)
+    # Fixed = locked for a term (Blue, or an explicitly fixed type). A floating
+    # product without a separate adjustment clause is STILL floating (it resets
+    # monthly) -- do not infer "fixed" from the absence of a clause.
+    is_fixed = offer.get("color") == "Blue" or "fixed" in str(offer.get("type", ""))
     if not is_fixed:
         return "floating"
     months = 0

@@ -260,7 +260,7 @@ def mo_ref(offer_id, field):
 ws = wb.create_sheet("Scenario_Model")
 ws["A1"] = "Scenario_Model — estimated ANNUAL competitive-supply cost (component A only) of each offer on each supply"
 ws["A1"].font = TITLE
-ws["A2"] = ("Shows only the provider-dependent part (A = paygio + energy - discounts) annualised on each supply's sampled consumption. "
+ws["A2"] = ("Shows only the provider-dependent part (A = paygio + energy - discounts) annualised on each supply's sampled consumption (NB: scaled from a short, not-seasonally-representative sample). "
             "Regulated/municipal/ERT/taxes are identical across providers and are excluded here (they are added back in Backtest). "
             "Night-tariff supply S4 priced on TOTAL kWh at the offer's day rate unless the offer has a night rate (conservative).")
 ws["A2"].alignment = WRAP; ws["A2"].font = Font(italic=True, size=9)
@@ -414,7 +414,7 @@ def _tr_newtotal(b, o):
     nA = o["paygio"]*b["days"]/30.0 + e
     return fx + nA + _VR*(nA + xb)
 def _tr_tier(o):
-    is_fixed = o.get("color") == "Blue" or "fixed" in str(o.get("type", "")) or not o.get("adj_clause", True)
+    is_fixed = o.get("color") == "Blue" or "fixed" in str(o.get("type", ""))  # clause-free floating is still floating
     if not is_fixed: return (0, "Floating — follow the market")
     m = 0
     for tok in str(o.get("contract", "")).replace("-", " ").split():
