@@ -20,6 +20,12 @@ An "offer" dict:
     energy_rate   EFFECTIVE day/flat rate EUR/kWh (base + ritra - discounts, NOT headline)
     night_rate    EFFECTIVE night rate EUR/kWh, or None for single-register offers
 
+LIMITATION: this models a flat or day/night rate. Tiered products (e.g. 0-700 /
+>700 kWh, or day >200 kWh) and formula-indexed products (a*DAM+b, hourly MCP) are
+NOT a single rate. Reduce them to an effective EUR/kWh FIRST -- with
+tiered_effective_rate() for tiers, or by evaluating the formula at the current
+wholesale index -- then pass the result as energy_rate.
+
 Usage:
     from backtest_engine import backtest_bill, VAT
     new_total, saving, pct = backtest_bill(bill, offer)
@@ -67,6 +73,23 @@ def backtest_supply(bills, offer):
     saving = round(actual - new, 2)
     pct = round(saving / actual * 100, 1) if actual else 0.0
     return round(actual, 2), round(new, 2), saving, pct
+
+
+def tiered_effective_rate(kwh_month, tiers):
+    """Blended EUR/kWh for a tiered product at a given monthly consumption.
+    tiers = [(upto_kwh_or_None, rate), ...] in ascending order; None = open top tier.
+    Example: 0-700 @0.149, >700 @0.189  ->  tiers=[(700,0.149),(None,0.189)]
+    """
+    remaining, cost, lo = kwh_month, 0.0, 0
+    for upto, rate in tiers:
+        band = (upto - lo) if upto is not None else remaining
+        take = max(0.0, min(remaining, band))
+        cost += take * rate
+        remaining -= take
+        lo = upto if upto is not None else lo
+        if remaining <= 0:
+            break
+    return cost / kwh_month if kwh_month else 0.0
 
 
 def rank_offers(bills, offers):

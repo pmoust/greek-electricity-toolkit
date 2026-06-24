@@ -37,6 +37,7 @@ See [greek-tariff-reference.md](greek-tariff-reference.md) for current unit rate
    new_total  = fixed_part + new_A + new_VAT
    ```
    The reusable engine is [backtest_engine.py](backtest_engine.py).
+6. **Compare across the WHOLE market — don't name a winner from memory.** Pull the current active-supplier list from the official ΡΑΑΕΥ tool **energycost.gr** (the field consolidates — see reference); the cheapest option is frequently a **non-incumbent or a recent entrant**, not ΔΕΗ/ΗΡΩΝ. For each candidate: (a) filter by **segment** (residential vs business/κοινόχρηστα) and **meter type** (single vs dual-zone) — an offer your meter can't take is not a candidate; (b) compute its **effective** rate; (c) `rank_offers(...)` over *all* of them; (d) tag each with an **eligibility** flag (accepts your κοινόχρηστα/kVA/dual meter?) and a **data-confidence** flag (live energycost.gr value vs aggregator/stale vs formula-indexed). Never present a rate you cannot source as if it were available.
 
 ## Gotchas (each one flips a number)
 
@@ -44,7 +45,9 @@ See [greek-tariff-reference.md](greek-tariff-reference.md) for current unit rate
 - **Carried debt:** `Προηγούμενο Ανεξόφλητο Ποσό` and final-payable include old arrears. Compare on the **current-period** charge, not final payable.
 - **Night/dual tariff (Γ1Ν, διζωνικό):** has separate day (κανονική) and night (μειωμένη) registers. Don't apply a single flat offer rate to its total kWh — price each register, or note the ~25–30% night share. Few suppliers offer dual-zone (ΔΕΗ EnterTwo fixed, Zenith Go Electric Plus floating); ΗΡΩΝ does not.
 - **Consumption level sets the lever:** at low kWh/month the **πάγιο (standing charge) dominates** → a zero-πάγιο plan usually wins even at a higher rate. At high kWh the energy rate dominates. Compute, don't assume.
-- **Business/κοινόχρηστα supplies** (common areas, often ≥25 kVA) use business tariffs and higher ΕΦΚ (0,005) — residential offers don't apply.
+- **Business/κοινόχρηστα supplies** (common areas, often ≥25 kVA) use business tariffs and higher ΕΦΚ (0,005) — residential offers don't apply. Confirm a candidate explicitly accepts a **shared κοινόχρηστα meter** before recommending it; the cheapest business product may not, and that caveat can decide the answer.
+- **"Fixed beats floating" is NOT a rule — it's segment-dependent.** Sometimes the cheapest option is a *floating* product (e.g. a low-margin business green tariff), while the *fixed* product in the same segment is pricier than the floating you already have. Rank both; let the numbers decide. Fixed's value is certainty (no monthly reset), not always a lower price.
+- **Tiered & formula-indexed tariffs aren't a single rate.** Many products are tiered (e.g. 0–700 / >700 kWh, day >200 kWh) or indexed (`a×DAM+b`, hourly MCP). Reduce them to an **effective** €/kWh at the supply's actual monthly kWh and the current wholesale index *before* feeding the engine — see `tiered_effective_rate` in [backtest_engine.py](backtest_engine.py).
 - **Discounts are conditional** (έκπτωση συνέπειας/on-time, πάγια εντολή, e-bill). Headline rates assume you keep them; a missed payment reverts to a much higher nominal rate.
 - **Floating rates reset monthly.** Verify any Κίτρινο/Πράσινο rate on the official ΡΑΑΕΥ tool **energycost.gr** before relying on it. Fixed (Μπλε) rates lock for the term.
 
@@ -55,6 +58,10 @@ For a multi-supply comparison build an Excel workbook (openpyxl) with live formu
 ## Red flags — stop and recompute
 
 - Comparing on a headline `0,08xx €/kWh` without finding the Διακύμανση/ρήτρα line
+- **Naming a "cheapest" provider from memory of the big names** instead of ranking the live energycost.gr list (the winner is often a non-incumbent)
+- **Assuming fixed beats floating** (or vice-versa) without ranking both
+- Recommending a product without confirming the **meter/segment fits** (κοινόχρηστα, kVA, dual-zone)
+- Treating a **tiered or DAM/MCP-indexed** tariff as one flat rate
 - Applying VAT to municipal fees or ΕΡΤ (it doesn't apply there)
 - Using final-payable (includes arrears) instead of current-period cost
 - Recommending a low-rate/high-πάγιο plan for a near-dormant supply

@@ -44,9 +44,39 @@ Snapshot researched **2026-06**. Floating rates reset monthly — re-verify on t
 
 Day (κανονική) and night (μειωμένη) registers. National night windows: **winter (1 Nov–31 Mar)** 02:00–05:00 + 12:00–15:00; **summer (1 Apr–31 Oct)** 02:00–04:00 + 11:00–15:00; weekends/holidays reduced all day. Dual-zone supply products are scarce: **ΔΕΗ myHome EnterTwo** (fixed), **Zenith Power Home Go Electric Plus** (floating). ΗΡΩΝ has no residential dual-zone supply product.
 
-## Provider landscape (mid-2026)
+## Suppliers to check (mid-2026) — and the traps
 
-Active residential suppliers include: ΔΕΗ (PPC), ΗΡΩΝ, Protergia (Metlen), Elpedison→**Enerwave** (rebranded under HELLENiQ), NRG (Motor Oil), Φυσικό Αέριο Ελληνική Εταιρεία Ενέργειας, Volton, Zenith, Volterra (AVAX), ELIN/ELINOIL, plus smaller entrants. **WATT+VOLT no longer exists — fully absorbed into Protergia.** Always re-check the current energycost.gr supplier list; the market consolidates.
+**Always pull the live list from energycost.gr** before relying on this; the market consolidates fast. Check every ACTIVE supplier (don't reason from the big names only — the cheapest is often a non-incumbent). Account for who has merged, gone direct-only, or exited.
+
+| Supplier | Status | Notes for comparison |
+|---|---|---|
+| ΔΕΗ / PPC | active, incumbent | only mainstream dual-zone Γ1Ν fixed (myHome EnterTwo) |
+| ΗΡΩΝ / Heron | active | PROTECT = floating w/ Διακύμανση; Generous/Yellow families cheaper |
+| Protergia (Metlen) | active | absorbed **WATT+VOLT** and **EFA Energy** |
+| Elpedison → **Enerwave** | active (rebranded) | HELLENiQ Energy; use enerwave.gr |
+| NRG (Motor Oil) | active | aggregator-sourced rates; removed e-bill/direct-debit discounts 01.03.2026 |
+| Φυσικό Αέριο Ελλ. Εταιρεία Ενέργειας | active | site often blocks scraping; some tiered products |
+| Volton | active | ΜΤΑΜ-indexed floating products |
+| Zenith (Eni) | active | offers dual-zone (Go Electric Plus) |
+| ELIN / ELINOIL | active | low-/zero-πάγιο; cheap business green (κοινόχρηστα acceptance to confirm) |
+| WE Energy / Eunice Power | active | weenergy.gr → eunice-power.gr; formula-indexed (DAM/MCP) products |
+| ΟΤΕ Estate | active | single green/special product |
+| Nova Energy (United Group) | active, **direct/in-store only** | not on aggregators; quote via energycost.gr / provider |
+| PetroGaz Energy | active, **direct only** | no public per-kWh data |
+| **Volterra** | **acquired by Metlen (Jul-2024)** | off switching platforms, pricing stale → treat as unavailable |
+| **WATT+VOLT** | **defunct** → Protergia | not an independent option |
+| **EFA Energy** | **merged** → Protergia | not an independent option |
+| **ΕΛΤΑ Ενέργεια** | **exited electricity (2023)** | gone |
+| **ΒΙΕΝΕΡ / Viener** | commercial/wholesale only | not a household option |
+| **Octopus Energy** | **not in the Greek market** | — |
+
+Provider marketing names don't always match the RAAEY color — verify the mechanism, not the brand.
+
+## Regulated extras & policy items
+
+- **Government subsidy "Τ.Ε.Μ." (Ταμείο Ενεργειακής Μετάβασης):** per-kWh credit applied to all suppliers *only when activated*. Model as **0** unless a specific month's subsidy is announced; if active it appears as a separate credit line.
+- **ΚΟΤ (Κοινωνικό Οικιακό Τιμολόγιο)** social tariff and **heating allowance**: eligibility-based, provider-independent — they don't differentiate suppliers in a comparison.
+- **VAT and ΕΦΚ are policy-set and change.** The 6% electricity VAT and the 0,0022 €/kWh residential ΕΦΚ are reduced/crisis-era values — re-verify they're still current.
 
 ## Reading-a-bill cheatsheet
 
