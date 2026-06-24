@@ -34,14 +34,24 @@ jobs:
         continue-on-error: true
 
       # 2. Agent researches the market and rewrites data/offers_current.json.
-      #    Skipped automatically if no API key is configured.
+      #    Uses Claude Code in headless (-p) mode — built for non-interactive
+      #    automation. Skipped automatically if no API key is configured.
+      - uses: actions/setup-node@v4
+        if: env.HAS_KEY == 'true'
+        with:
+          node-version: "20"
+      - name: Install Claude Code
+        if: env.HAS_KEY == 'true'
+        run: npm install -g @anthropic-ai/claude-code
       - name: Agent — refresh offers
         if: env.HAS_KEY == 'true'
-        uses: anthropics/claude-code-action@beta
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: "Follow .github/refresh-prompt.md exactly. Update data/offers_current.json and set meta.last_verified to today's date."
-          claude_args: "--allowedTools WebSearch,WebFetch,Read,Edit,Write --max-turns 40"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p "Read .github/refresh-prompt.md and follow it exactly. Update data/offers_current.json in place and set meta.last_verified to today's date (UTC)." \
+            --allowed-tools "Read" "WebSearch" "WebFetch" "Edit" "Write" \
+            --permission-mode acceptEdits \
+            --max-turns 40
 
       # 3. GATE — the agent's output must pass schema + full test suite before a PR.
       - name: Validate refreshed data (gate)
