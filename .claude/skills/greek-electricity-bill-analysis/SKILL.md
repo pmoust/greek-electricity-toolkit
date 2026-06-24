@@ -1,6 +1,7 @@
 ---
 name: greek-electricity-bill-analysis
 description: Use when comparing Greek electricity providers/tariffs, parsing ΔΕΗ/ΗΡΩΝ/Protergia/Elpedison/etc bills (λογαριασμός ρεύματος), deciding whether to switch supplier, or backtesting what a bill would have cost on another offer. Covers προμήθεια vs ρυθμιζόμενες χρεώσεις, the Διακύμανση/ρήτρα adjustment clause, ΕΦΚ, ΦΠΑ 6%, ΥΚΩ/ΕΤΜΕΑΡ, Γ1Ν night tariff, έναντι/εκκαθαριστικός bills, and RAAEY Μπλε/Πράσινο/Κίτρινο colors.
+license: MIT
 ---
 
 # Greek Electricity Bill Analysis
