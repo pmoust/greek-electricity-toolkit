@@ -24,7 +24,9 @@ Note the lessons the skill encodes: at **D2** a zero-πάγιο plan beats a low
 
 ## How the numbers are built
 
-Each bill splits into four blocks; **only the competitive-supply block changes** when you switch. The backtest replaces that block, keeps regulated charges, municipal fees, ΕΡΤ and taxes exactly as billed, and recomputes VAT at 6% of (supply + regulated + ΕΦΚ). See the project [`SKILL.md`](../.claude/skills/greek-electricity-bill-analysis/SKILL.md) and `example_model.xlsx` (sheets: Bills_Raw, Supplies, Bill_Line_Items, Fee_Model, Market_Offers, Scenario_Model, Backtest, Recommendation).
+Each bill splits into four blocks; **only the competitive-supply block changes** when you switch. The backtest replaces that block, keeps regulated charges, municipal fees, ΕΡΤ and taxes exactly as billed, and recomputes VAT at 6% of (supply + regulated + ΕΦΚ). See the project [`SKILL.md`](../.claude/skills/greek-electricity-bill-analysis/SKILL.md) and `example_model.xlsx` (sheets: Bills_Raw, Supplies, Bill_Line_Items, Fee_Model, Market_Offers, Scenario_Model, Backtest, **Tier_Ranking**, Recommendation).
+
+The **Tier_Ranking** sheet applies the strategy-before-price rule: per supply it groups offers by commitment tier (floating / fixed-≤12m / fixed-13–24m) and ranks within each, with the fixed term shown — so you choose *follow-the-market vs lock-a-price* first, then the cheapest in that tier. (In this demo it also shows the common-areas *fixed* business product is ~€21 **worse** than the floating, i.e. fixed ≠ cheaper.)
 
 ## Backtest (per bill)
 

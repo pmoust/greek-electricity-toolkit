@@ -389,6 +389,87 @@ for s in SUPPLIES:
     r += 1
 
 # =====================================================================
+# =====================================================================
+# SHEET: Tier_Ranking — rank WITHIN commitment tiers (strategy before price)
+# =====================================================================
+ws = wb.create_sheet("Tier_Ranking")
+ws["A1"] = "Tier_Ranking — decide commit-to-a-price vs follow-the-market FIRST, then compare within the tier"
+ws["A1"].font = TITLE
+ws["A2"] = ("Floating, 1-year fixed and multi-year fixed are different RISK products, not one price line. Per supply, "
+            "offers are grouped by commitment tier and ranked cheapest-first WITHIN each tier (computed on the sampled "
+            "bills; re-run the builder after editing Market_Offers). Weigh the fixed term: a long lock in a volatile "
+            "market is opportunity risk + an exit fee, not free certainty. Cheapest in each tier is highlighted.")
+ws["A2"].alignment = WRAP; ws["A2"].font = Font(italic=True, size=9)
+ws.merge_cells("A2:H2")
+
+_VR = META.get("vat_rate", 0.06)
+def _tr_econ(b):
+    if b.get("enanti_credit") and b.get("gross_total") is not None:
+        return b["gross_A_supply"], b["gross_vat"], b["gross_total"], b["gross_vat_base"] - b["gross_A_supply"]
+    return b["A_supply"], b["vat"], b["current_total"], b["vat_base"] - b["A_supply"]
+def _tr_newtotal(b, o):
+    A, v, t, xb = _tr_econ(b); fx = t - A - v
+    rd = o["energy_rate"]; rn = o.get("night_rate")
+    e = b["kwh_day"]*rd + b["kwh_night"]*rn if (rn and b.get("kwh_night", 0) > 0) else b["kwh_total"]*rd
+    nA = o["paygio"]*b["days"]/30.0 + e
+    return fx + nA + _VR*(nA + xb)
+def _tr_tier(o):
+    is_fixed = o.get("color") == "Blue" or "fixed" in str(o.get("type", "")) or not o.get("adj_clause", True)
+    if not is_fixed: return (0, "Floating — follow the market")
+    m = 0
+    for tok in str(o.get("contract", "")).replace("-", " ").split():
+        if tok.isdigit(): m = int(tok); break
+    if m == 0: return (1, "Fixed — term unspecified")
+    if m <= 12: return (2, "Fixed ≤ 12 months")
+    if m <= 24: return (3, "Fixed 13–24 months")
+    return (4, "Fixed > 24 months")
+def _tr_business(sup):
+    return "business" in str(sup.get("customer_type", "")).lower() or sup.get("efk_per_kwh") == 0.005
+def _tr_applicable(o, sup):
+    seg = o.get("segment", "")
+    if _tr_business(sup): return seg == "business"
+    if "dual" in str(sup.get("register", "")): return seg in ("resi", "resi-night")
+    return seg == "resi"
+
+trow = 4
+_hdr = ["Offer", "Provider", "Color", "Term", "Eff. €/kWh", "New total (sample) €", "Saving €", "Saving %"]
+_NC = len(_hdr)
+for sup in SUPPLIES:
+    sb = [b for b in BILLS if b["supply_id"] == sup["id"]]
+    actual = sum(_tr_econ(b)[2] for b in sb)
+    hc = ws.cell(row=trow, column=1, value=f"{sup['id']} — {sup['property']}  ·  current actual (sample): €{actual:,.2f}")
+    hc.font = SUBHDR; ws.merge_cells(start_row=trow, start_column=1, end_row=trow, end_column=_NC); trow += 1
+    for i, h in enumerate(_hdr, 1): ws.cell(row=trow, column=i, value=h)
+    style_header_row(ws, trow, _NC); trow += 1
+    groups = {}
+    for o in OFFERS:
+        if not _tr_applicable(o, sup): continue
+        k = _tr_tier(o); tot = sum(_tr_newtotal(b, o) for b in sb)
+        groups.setdefault(k, []).append((tot, o))
+    if not groups:
+        ws.cell(row=trow, column=1, value="(no applicable offers for this segment/meter)"); trow += 1
+    for k in sorted(groups):
+        gc = ws.cell(row=trow, column=1, value=k[1]); gc.font = BOLD
+        ws.merge_cells(start_row=trow, start_column=1, end_row=trow, end_column=_NC)
+        for cc in range(1, _NC + 1): ws.cell(row=trow, column=cc).fill = GREY
+        trow += 1
+        for j, (tot, o) in enumerate(sorted(groups[k], key=lambda x: x[0])):
+            sav = actual - tot
+            vals = [o["product"], o["provider"], o.get("color", ""), o.get("contract", ""),
+                    o["energy_rate"], round(tot, 2), round(sav, 2), (sav/actual if actual else 0)]
+            for i, v in enumerate(vals, 1):
+                cell = ws.cell(row=trow, column=i, value=v); cell.border = BORDER; cell.alignment = WRAP
+                if i == 5: cell.number_format = RATE
+                if i in (6, 7): cell.number_format = EUR
+                if i == 8: cell.number_format = PCT
+            if j == 0:
+                for cc in range(1, _NC + 1): ws.cell(row=trow, column=cc).fill = GOOD
+            trow += 1
+    trow += 1
+autosize(ws, {"A": 32, "B": 18, "C": 8, "D": 18, "E": 11, "F": 18, "G": 11, "H": 10})
+ws.freeze_panes = "A4"
+
+
 # SHEET 8: Recommendation
 # =====================================================================
 ws = wb.create_sheet("Recommendation")

@@ -55,7 +55,7 @@ See [greek-tariff-reference.md](greek-tariff-reference.md) for current unit rate
 
 ## Deliverables that work
 
-For a multi-supply comparison build an Excel workbook (openpyxl) with live formulas so rates can be tweaked: `Bills_Raw, Supplies, Bill_Line_Items, Fee_Model, Market_Offers, Scenario_Model, Backtest, Recommendation`. Validate the embedded formulas by a headless `soffice --headless --convert-to xlsx` recalc and reading values back with `data_only=True`.
+For a multi-supply comparison build an Excel workbook (openpyxl) with live formulas so rates can be tweaked: `Bills_Raw, Supplies, Bill_Line_Items, Fee_Model, Market_Offers, Scenario_Model, Backtest, Tier_Ranking, Recommendation`. `Tier_Ranking` groups offers by commitment tier (floating / fixed-by-term) and ranks within each — never one flat list across tiers. Validate the embedded formulas by a headless `soffice --headless --convert-to xlsx` recalc and reading values back with `data_only=True`.
 
 ## Red flags — stop and recompute
 
