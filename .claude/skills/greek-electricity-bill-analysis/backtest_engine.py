@@ -36,6 +36,8 @@ Single source of truth for the workbook builder too. Public helpers:
     rank_within_tiers                                  -- strategy-before-price ranking
     offer_applies(offer, supply)                       -- segment + meter eligibility
     tiered_effective_rate                              -- blend a tiered product
+    annual_cost(offer, profile) / regulated_charge     -- seasonal all-in annual comparator
+    night_shift_saving                                 -- value of moving load to the night register
 """
 
 VAT = 0.06  # reduced electricity VAT in Greece (verify current value)

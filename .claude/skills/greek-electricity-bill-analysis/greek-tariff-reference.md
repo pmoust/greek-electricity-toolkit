@@ -21,7 +21,14 @@ Floating, 1-year fixed and 2-year fixed are **different products on a risk axis*
 2. **If fixed, for how long?** A multi-year lock (e.g. a 24-month tariff) is only "cheaper" if you'd actually hold it. In a volatile market (fuel/geopolitical shocks) a long lock carries opportunity risk if prices fall — and an early-exit fee if you leave. Treat **term length** as a first-class factor, not a footnote.
 3. **Then** rank cheapest-within-tier and compare the cheapest *floating* vs cheapest *1y-fixed* vs cheapest *2y-fixed* as three distinct choices.
 
-**Sample & seasonality:** a handful of bills (e.g. 6–8) can't show seasonal swings (summer A/C, winter heating). Don't annualise a short sample by naive scaling — it over/under-weights the season you captured. Use ≥12 consecutive months, or weight by season, and label coverage.
+**Sample & seasonality:** a handful of bills (e.g. 6–8) can't show seasonal swings (summer A/C, winter heating). Don't annualise a short sample by naive scaling — it over/under-weights the season you captured. Use ≥12 consecutive months, or the seasonally-weighted `annual_cost(offer, profile)` comparator (reference profile of 4-month bands × day/night + kVA, all-in), and label coverage.
+
+## Incentives, pricing basis & per-offer caveats (things easy to miss)
+
+- **Sign-up gifts (δώρα):** vouchers / bill credits (e.g. €50 Πλαίσιο voucher, monthly referral credits, loyalty points) are common and **materially cut the first-year cost** — but they're **volatile and conditional** (e-contract, "not claimed in the last 6 months", may be clawed back). Count them in the **first-year** total only, never as a recurring rate; record the condition (`gift_eur`, `gift_conditions`).
+- **Pricing basis (finer than colour):** how the floating price is set affects predictability — `green-monthly` (announced on the 1st, fixed for the month) vs `index-prev-month` (indexed to the previous month's ΤΕΑ) vs `dynamic-hourly`. Track per offer.
+- **Per-offer behaviour caveats:** some suppliers claw back the consistency discount on final-bill consumption, change discounts improperly, or charge an **exit fee per remaining month** (e.g. €10–20/month left on a fixed term). Capture `exit_fee_per_month` and a free-text `caveat`.
+- **Night-shift value:** for a dual-zone (Γ1Ν) supply, quantify what shifting load to the night register saves (`night_shift_saving`) — it can rival a tariff switch.
 
 ## Charge basis & who sets it
 
