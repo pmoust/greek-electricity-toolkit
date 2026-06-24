@@ -79,7 +79,7 @@ python3 .claude/skills/greek-electricity-bill-analysis/backtest_engine.py
 | `.claude/skills/greek-electricity-bill-analysis/` | the reusable skill (SKILL.md + engine + reference) |
 | `examples/` | **sample output on fictional data** — [`example_report.md`](examples/example_report.md), `example_model.xlsx`, and the generators that build them |
 | `greek_electricity_contract_analysis_report.md` | the worked analysis of my 4 supplies (gitignored sample) |
-| `greek_electricity_contract_analysis_model.xlsx` | the 9-sheet model with live formulas, incl. a tier-grouped ranking (gitignored sample) |
+| `greek_electricity_contract_analysis_model.xlsx` | the 9-sheet model with live formulas, incl. a tier-grouped ranking (`Tier_Ranking`) (gitignored sample) |
 | `LICENSE` | MIT |
 
 ## Method in one line
