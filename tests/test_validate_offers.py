@@ -31,6 +31,21 @@ def test_validator_rejects_bad_offer(tmp_path):
     assert any("source" in e for e in errors)
 
 
+def test_validator_rejects_bad_optionals(tmp_path):
+    bad = {"meta": {"last_verified": "2026-06-24"},
+           "offers": [{"id": "X", "provider": "P", "product": "p", "segment": "resi",
+                       "energy_rate": 0.1, "paygio": 1, "color": "Blue",
+                       "source": "u", "date": "2026-06-24",
+                       "gift_eur": -5, "exit_fee_per_month": "ten",
+                       "pricing_basis": "made-up"}]}
+    p = tmp_path / "bad.json"
+    p.write_text(json.dumps(bad), encoding="utf-8")
+    errors, _ = vo.validate(str(p))
+    assert any("gift_eur" in e for e in errors)
+    assert any("exit_fee_per_month" in e for e in errors)
+    assert any("pricing_basis" in e for e in errors)
+
+
 def test_staleness_detection():
     assert vo.days_old({"last_verified": "2026-06-24"},
                        today=__import__("datetime").date(2026, 8, 1)) == 38

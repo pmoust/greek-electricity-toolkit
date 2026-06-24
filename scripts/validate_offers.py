@@ -13,6 +13,24 @@ import sys
 SEGMENTS = {"resi", "resi-night", "business"}
 COLORS = {"Blue", "Green", "Yellow", "Orange"}
 REQUIRED = {"id", "provider", "product", "segment", "energy_rate", "paygio", "color", "source", "date"}
+# How the price is set over time (finer than color; affects predictability).
+PRICING_BASES = {"fixed", "green-monthly", "index-prev-month", "dynamic-hourly"}
+
+
+def validate_offer_optionals(o):
+    """Validate the optional incentive/term/behaviour fields when present."""
+    errors = []
+    oid = o.get("id", "<no id>")
+    if "gift_eur" in o and (not isinstance(o["gift_eur"], (int, float)) or o["gift_eur"] < 0):
+        errors.append(f"{oid}: gift_eur must be a number >= 0")
+    if "exit_fee_per_month" in o and (not isinstance(o["exit_fee_per_month"], (int, float)) or o["exit_fee_per_month"] < 0):
+        errors.append(f"{oid}: exit_fee_per_month must be a number >= 0")
+    if "pricing_basis" in o and o["pricing_basis"] not in PRICING_BASES:
+        errors.append(f"{oid}: pricing_basis must be one of {sorted(PRICING_BASES)}")
+    for k in ("gift_conditions", "caveat"):
+        if k in o and not isinstance(o[k], str):
+            errors.append(f"{oid}: {k} must be a string")
+    return errors
 
 
 def validate(path):
@@ -46,6 +64,7 @@ def validate(path):
         if oid in seen:
             errors.append(f"duplicate offer id {oid}")
         seen.add(oid)
+        errors.extend(validate_offer_optionals(o))
     return errors, data
 
 
