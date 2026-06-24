@@ -12,6 +12,11 @@ You are refreshing `data/offers_current.json` for the greek-electricity-toolkit.
    you find, get each flagship product's current values: effective €/kWh (after the
    on-time / direct-debit discount), πάγιο, RAAEY color, tariff type, contract term,
    whether it has an adjustment clause, segment (resi / resi-night / business).
+   Also fill the optional fields when known (leave out if unknown — never guess):
+   `pricing_basis` (fixed / green-monthly / index-prev-month / dynamic-hourly),
+   `gift_eur` + `gift_conditions` (sign-up voucher/credit — first-year only, note the
+   condition; gifts are volatile), `exit_fee_per_month` (€ per remaining locked month),
+   and `caveat` (e.g. discount clawback, shared-meter eligibility unconfirmed).
 3. For tiered or formula-indexed (a×DAM+b, hourly MCP) products, reduce to an
    **effective** €/kWh at a typical consumption / the current wholesale index, and
    say so in the product note.

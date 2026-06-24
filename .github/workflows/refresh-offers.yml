@@ -1,13 +1,13 @@
-name: Refresh offers (weekly)
+name: Refresh offers (monthly)
 
-# Keeps data/offers_current.json current. An agent researches the live market and
-# proposes updates as a PR — NEVER auto-merged; a human (the grounded expert) reviews.
-# Requires repo secret ANTHROPIC_API_KEY for the agent step; without it, the job
-# still runs the freshness check and alerts when the data goes stale.
+# Keeps data/offers_current.json current. An agent (Claude Haiku — cheap, sufficient
+# for structured extraction) researches the live market and proposes updates as a PR
+# — NEVER auto-merged; a human (the grounded expert) reviews. Requires repo secret
+# ANTHROPIC_API_KEY; without it, the job still runs the freshness check and alerts.
 
 on:
   schedule:
-    - cron: "17 6 * * 1"   # Mondays 06:17 UTC
+    - cron: "0 6 1 * *"   # 1st of each month, 06:00 UTC (floating rates reset monthly)
   workflow_dispatch:
 
 permissions:
@@ -49,6 +49,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           claude -p "Read .github/refresh-prompt.md and follow it exactly. Update data/offers_current.json in place and set meta.last_verified to today's date (UTC)." \
+            --model claude-haiku-4-5-20251001 \
             --allowed-tools "Read" "WebSearch" "WebFetch" "Edit" "Write" \
             --permission-mode acceptEdits \
             --max-turns 40
@@ -60,17 +61,29 @@ jobs:
           python scripts/validate_offers.py data/offers_current.json
           pytest -q
 
+      # 3b. Append a dated snapshot to the price-history time series.
+      - name: Append snapshot to history
+        if: env.HAS_KEY == 'true'
+        run: |
+          python - <<'PY'
+          import json
+          d = json.load(open("data/offers_current.json", encoding="utf-8"))
+          snap = {"snapshot": d["meta"]["last_verified"], "offers": d["offers"]}
+          with open("data/offers_history.jsonl", "a", encoding="utf-8") as f:
+              f.write(json.dumps(snap, ensure_ascii=False) + "\n")
+          PY
+
       # 4. Open a PR for human review (only if data actually changed).
       - name: Open PR
         if: env.HAS_KEY == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           branch: chore/refresh-offers
-          title: "Weekly offer refresh"
+          title: "Monthly offer refresh"
           commit-message: "Refresh current offers from the market"
           labels: data, needs-human-review
           body: |
-            Automated weekly refresh of `data/offers_current.json` (agent-proposed, **not** auto-merged).
+            Automated monthly refresh of `data/offers_current.json` (agent-proposed via Claude Haiku, **not** auto-merged).
 
             Review against the source URLs before merging. Confirm:
             - every previously-active supplier is still present (or its removal is explained),
