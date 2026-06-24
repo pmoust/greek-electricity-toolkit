@@ -2,3 +2,4 @@ greek_electricity_contract_analysis_model.xlsx
 greek_electricity_contract_analysis_report.md
 __pycache__/
 *.pyc
+.pytest_cache/
