@@ -29,18 +29,52 @@ wholesale index -- then pass the result as energy_rate.
 Usage:
     from backtest_engine import backtest_bill, VAT
     new_total, saving, pct = backtest_bill(bill, offer)
+
+Single source of truth for the workbook builder too. Public helpers:
+    backtest_bill / backtest_supply / supply_actual  -- the core backtest
+    commitment_tier + TIER_ORDER/TIER_LABELS          -- floating vs fixed-by-term
+    rank_within_tiers                                  -- strategy-before-price ranking
+    offer_applies(offer, supply)                       -- segment + meter eligibility
+    tiered_effective_rate                              -- blend a tiered product
 """
 
 VAT = 0.06  # reduced electricity VAT in Greece (verify current value)
 
 
+def _is_enanti(bill):
+    """An enanti clearing bill whose printed payable nets out a prior on-account
+    charge: use its reconstructed gross. Detected by an explicit flag OR by the
+    presence of gross_* fields alongside a non-zero enanti_credit."""
+    return bool(bill.get("is_enanti")) or (
+        bill.get("enanti_credit") and bill.get("gross_total") is not None)
+
+
 def _econ(bill):
     """Return (A, vat, total, vat_base_excluding_A) using gross if it's an enanti bill."""
-    if bill.get("is_enanti"):
+    if _is_enanti(bill):
         A = bill["gross_A_supply"]
         return A, bill["gross_vat"], bill["gross_total"], bill["gross_vat_base"] - A
     A = bill["A_supply"]
     return A, bill["vat"], bill["current_total"], bill["vat_base"] - A
+
+
+def supply_actual(bills):
+    """Sum of the economic current-period cost across a supply's bills."""
+    return round(sum(_econ(b)[2] for b in bills), 2)
+
+
+def offer_applies(offer, supply):
+    """Is this offer a candidate for this supply? Matches segment + meter type:
+    business supplies need business offers; dual-register (Γ1Ν) supplies can take
+    residential single OR dual-zone offers; single-register residential takes resi."""
+    seg = offer.get("segment", "")
+    is_business = "business" in str(supply.get("customer_type", "")).lower() \
+        or supply.get("efk_per_kwh") == 0.005
+    if is_business:
+        return seg == "business"
+    if "dual" in str(supply.get("register", "")):
+        return seg in ("resi", "resi-night")
+    return seg == "resi"
 
 
 def new_supply_charge(bill, offer):
@@ -127,6 +161,17 @@ def commitment_tier(offer):
     if months <= 24:
         return "fixed-13-24m"
     return "fixed->24m"
+
+
+# Display order + human labels for the commitment tiers (shared by report/workbook).
+TIER_ORDER = ["floating", "fixed-<=12m", "fixed-13-24m", "fixed->24m", "fixed-term?"]
+TIER_LABELS = {
+    "floating": "Floating — follow the market",
+    "fixed-<=12m": "Fixed ≤ 12 months",
+    "fixed-13-24m": "Fixed 13–24 months",
+    "fixed->24m": "Fixed > 24 months",
+    "fixed-term?": "Fixed — term unspecified",
+}
 
 
 def rank_within_tiers(bills, offers):
