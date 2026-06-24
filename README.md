@@ -6,6 +6,26 @@
 
 A Claude skill (plus a worked analysis) for reading Greek electricity bills, working out what you actually pay, and finding whether another provider/tariff would be cheaper — grounded in how Greek bills are really built, not the marketing headline rate.
 
+## Install
+
+**As a plugin (recommended — works anywhere):**
+
+```text
+/plugin marketplace add pmoust/greek-electricity-toolkit
+/plugin install greek-electricity-toolkit@greek-electricity-toolkit
+```
+
+**Or as a plain skill** (Claude Code reads `.claude/skills/` in the current project and `~/.claude/skills/` globally):
+
+```bash
+# use it only inside this repo: just run Claude Code here
+cd greek-electricity-toolkit && claude
+# …or use it for any folder on your machine:
+cp -r .claude/skills/greek-electricity-bill-analysis ~/.claude/skills/
+```
+
+Confirm it loaded: in the session, `/skills` should list `greek-electricity-bill-analysis`.
+
 ## Why this exists
 
 I have four electricity supplies — three with ΗΡΩΝ (a residence and two on a building on Kea), one big one with ΔΕΗ (my main home, on a night tariff). I wanted a straight answer to a simple question: **am I overpaying, and what should I switch to?**
@@ -41,29 +61,9 @@ The generated report (executive summary + per-supply recommendation):
 
 ## How to use the skill
 
-The skill lives in [`.claude/skills/greek-electricity-bill-analysis/`](.claude/skills/greek-electricity-bill-analysis/). It's a [Claude Code](https://docs.claude.com/en/docs/claude-code) skill — three plain files (instructions + a Python script + a reference sheet), no install, no dependencies.
+Once installed (see [Install](#install) above), the skill lives in [`.claude/skills/greek-electricity-bill-analysis/`](.claude/skills/greek-electricity-bill-analysis/) — three plain files (instructions + a Python script + a reference sheet), no dependencies. It auto-activates on the right triggers.
 
-### 1. Install it
-
-**As a plugin (recommended — works anywhere):**
-
-```text
-/plugin marketplace add pmoust/greek-electricity-toolkit
-/plugin install greek-electricity-toolkit@greek-electricity-toolkit
-```
-
-**Or as a plain skill** (Claude Code reads `.claude/skills/` in the current project and `~/.claude/skills/` globally):
-
-```bash
-# use it only inside this repo: just run Claude Code here
-cd greek-electricity-toolkit && claude
-# …or use it for any folder on your machine:
-cp -r .claude/skills/greek-electricity-bill-analysis ~/.claude/skills/
-```
-
-Confirm it loaded: in the session, `/skills` should list `greek-electricity-bill-analysis`.
-
-### 2. Give Claude the actual bills
+### 1. Give Claude the actual bills
 
 The skill reads bills with `pdftotext` (install `poppler` if you don't have it: `brew install poppler`). Put the PDFs somewhere Claude can read and point at them — paths, not vibes:
 
@@ -71,7 +71,7 @@ The skill reads bills with `pdftotext` (install `poppler` if you don't have it: 
 
 Claude then follows `SKILL.md`: extract → reconcile each bill to the cent → split the one charge you control from the three you don't → compute the **effective** rate (with the hidden ρήτρα) → backtest alternatives.
 
-### 3. Feed it real offers (it won't invent them)
+### 2. Feed it real offers (it won't invent them)
 
 This is the honest part: **the skill cannot know today's prices by itself.** Live rates reset monthly and aren't in the files. So either let Claude web-research current offers, or paste the rates you've collected, then it ranks them with `backtest_engine.py`. If you give it nothing, a good run will *tell you it needs the live numbers from energycost.gr* — it's built to refuse to fabricate a winner (that was the main bug we fixed).
 
