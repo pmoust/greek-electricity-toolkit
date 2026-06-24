@@ -1,5 +1,9 @@
 # Greek Electricity Toolkit
 
+[![CI](https://github.com/pmoust/greek-electricity-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/pmoust/greek-electricity-toolkit/actions/workflows/ci.yml)
+&nbsp;![Skill](https://img.shields.io/badge/Claude-skill-1F4E78)
+&nbsp;![License](https://img.shields.io/badge/license-MIT-blue)
+
 A Claude skill (plus a worked analysis) for reading Greek electricity bills, working out what you actually pay, and finding whether another provider/tariff would be cheaper — grounded in how Greek bills are really built, not the marketing headline rate.
 
 ## Why this exists
@@ -20,7 +24,20 @@ Given any Greek electricity bill (λογαριασμός ρεύματος) it le
 2. **Separate** the one charge you control (Προμήθεια / competitive supply) from the three you don't (regulated network charges, taxes, municipal/ΕΡΤ) — only the first changes when you switch.
 3. **Compute the *effective* rate**, including the hidden adjustment clause — the single most common mistake.
 4. **Backtest** any offer: what this exact bill would have cost on another tariff, with VAT recomputed correctly (6% of energy + regulated + ΕΦΚ; *not* on municipal fees or ΕΡΤ).
-5. **Rank the whole market** — not just the incumbents — flagging tariff color (Μπλε/Πράσινο/Κίτρινο), eligibility (meter type, κοινόχρηστα, kVA), and data freshness.
+5. **Rank the whole market** — not just the incumbents — but **strategy before price**: floating vs 1-year-fixed vs multi-year-fixed are different risk products, so it ranks *within* each commitment tier (not one misleading flat list), flagging color, eligibility (meter/κοινόχρηστα/kVA), contract term, sign-up gifts (first-year, volatile), pricing basis, and data freshness.
+6. **Estimate an all-in annual cost** at a seasonally-weighted reference profile (4-month bands × day/night + kVA) — instead of naively scaling a short sample.
+
+## See it (on synthetic demo data)
+
+The `Tier_Ranking` sheet — decide *follow-the-market vs lock-a-price* first, then compare within the tier (cheapest in each is highlighted; note the fixed business plan that's actually **worse** than floating):
+
+![Tier ranking sheet](docs/img/tier_ranking.png)
+
+The generated report (executive summary + per-supply recommendation):
+
+![Example report](docs/img/example_report.png)
+
+> Both are produced from **fictional** data (`Provider-A…E`) by the generators in [`examples/`](examples/) — no real customer data. Run `python examples/build_example.py` to rebuild.
 
 ## How to use the skill
 
@@ -54,8 +71,8 @@ This is the honest part: **the skill cannot know today's prices by itself.** Liv
 
 ### What each file does
 - **`SKILL.md`** — the method: the four bill blocks, the effective-rate rule, the backtest formula, the market-comparison workflow, and the gotchas.
-- **`backtest_engine.py`** — runnable, dependency-free. `backtest_bill(bill, offer)` → `(new_total, saving, pct)`; `backtest_supply(...)`, `rank_offers(...)`, and `tiered_effective_rate(kwh_month, tiers)`.
-- **`greek-tariff-reference.md`** — current rates (VAT, ΕΦΚ, ΕΤΜΕΑΡ, ΥΚΩ, distribution), RAAEY colors, night-tariff hours, the bill-reading cheatsheet, and the supplier list.
+- **`backtest_engine.py`** — runnable, dependency-free single source of truth: `backtest_bill` / `backtest_supply` / `supply_actual`, `commitment_tier` + `rank_within_tiers` (strategy-before-price), `offer_applies` (segment/meter eligibility), `tiered_effective_rate`, and `annual_cost` / `night_shift_saving` (seasonal all-in comparator).
+- **`greek-tariff-reference.md`** — current rates (VAT, ΕΦΚ, ΕΤΜΕΑΡ, ΥΚΩ, distribution), RAAEY colors, night-tariff hours, incentives/pricing-basis/caveats, the bill-reading cheatsheet, and the supplier list.
 
 ### Honest limits
 - It needs **text-based** bill PDFs (ΔΕΗ/ΗΡΩΝ are; a scanned photo would need OCR first).
@@ -78,13 +95,23 @@ python3 .claude/skills/greek-electricity-bill-analysis/backtest_engine.py
 |---|---|
 | `.claude/skills/greek-electricity-bill-analysis/` | the reusable skill (SKILL.md + engine + reference) |
 | `examples/` | **sample output on fictional data** — [`example_report.md`](examples/example_report.md), `example_model.xlsx`, and the generators that build them |
-| `greek_electricity_contract_analysis_report.md` | the worked analysis of my 4 supplies (gitignored sample) |
-| `greek_electricity_contract_analysis_model.xlsx` | the 9-sheet model with live formulas, incl. a tier-grouped ranking (`Tier_Ranking`) (gitignored sample) |
+| `tests/` | pytest suite — engine math, data/schema, PII-safety, doc-consistency, golden totals (runs in CI) |
+| `scripts/validate_offers.py` | schema + freshness validator (the gate for the refresh workflow) |
+| `data/offers_current.json` | canonical current-offers dataset (+ `offers_history.jsonl` time series) |
+| `.github/workflows/` | `ci.yml` (tests on every push/PR) and `refresh-offers.yml` (monthly agent refresh) |
+| `docs/img/` | the screenshots above |
+| `greek_electricity_contract_analysis_{report.md,model.xlsx}` | the worked analysis of my 4 real supplies (gitignored — never committed) |
 | `LICENSE` | MIT |
 
 ## Method in one line
 
 `new_total = (regulated + taxes + municipal + ΕΡΤ, unchanged) + new_supply_charge + 6%·(new_supply_charge + regulated + ΕΦΚ)` — everything but the supply charge stays exactly as billed.
+
+## Tested & self-updating
+
+- **CI** ([`ci.yml`](.github/workflows/ci.yml)) runs the `pytest` suite on every push/PR: the engine math (incl. the headline-trap regression), every bill reconciling to the cent, the offer schema, a **PII guard** (so real bills can never leak), doc-consistency, and golden totals.
+- **Monthly refresh** ([`refresh-offers.yml`](.github/workflows/refresh-offers.yml)): a **Claude Haiku** agent researches the live market, rewrites `data/offers_current.json`, and **must pass the validation gate (schema + full test suite)** before it opens a PR — which is **never auto-merged**; a human reviews. It appends a dated snapshot to the price-history series and alerts when data goes stale (floating rates reset monthly). It refuses to invent a rate.
+  - *Setup:* add repo secret `ANTHROPIC_API_KEY`, and enable **Settings → Actions → "Allow GitHub Actions to create and approve pull requests."**
 
 ## License
 
