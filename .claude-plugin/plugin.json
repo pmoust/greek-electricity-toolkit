@@ -1,0 +1,21 @@
+{
+  "name": "greek-electricity-toolkit",
+  "version": "0.1.0",
+  "description": "Read Greek electricity bills (ΔΕΗ/ΗΡΩΝ/Protergia/…), compute the true effective €/kWh behind the headline (the Διακύμανση/ρήτρα trap), separate the one charge you control from the regulated pass-throughs, and rank provider offers by commitment tier — with a backtest engine and a seasonal annual comparator.",
+  "author": {
+    "name": "Panagiotis Moustafellos"
+  },
+  "homepage": "https://github.com/pmoust/greek-electricity-toolkit",
+  "repository": "https://github.com/pmoust/greek-electricity-toolkit",
+  "license": "MIT",
+  "keywords": [
+    "greece",
+    "electricity",
+    "energy",
+    "tariffs",
+    "bills",
+    "ΔΕΗ",
+    "ΗΡΩΝ",
+    "skill"
+  ]
+}

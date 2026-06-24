@@ -43,15 +43,21 @@ The generated report (executive summary + per-supply recommendation):
 
 The skill lives in [`.claude/skills/greek-electricity-bill-analysis/`](.claude/skills/greek-electricity-bill-analysis/). It's a [Claude Code](https://docs.claude.com/en/docs/claude-code) skill — three plain files (instructions + a Python script + a reference sheet), no install, no dependencies.
 
-### 1. Make the skill discoverable
+### 1. Install it
 
-Claude Code picks up skills from `.claude/skills/` in the **current project** and from `~/.claude/skills/` **globally**. So either:
+**As a plugin (recommended — works anywhere):**
+
+```text
+/plugin marketplace add pmoust/greek-electricity-toolkit
+/plugin install greek-electricity-toolkit@greek-electricity-toolkit
+```
+
+**Or as a plain skill** (Claude Code reads `.claude/skills/` in the current project and `~/.claude/skills/` globally):
 
 ```bash
-# Option A — use it only inside this repo: just run Claude Code here.
+# use it only inside this repo: just run Claude Code here
 cd greek-electricity-toolkit && claude
-
-# Option B — use it for any folder on your machine:
+# …or use it for any folder on your machine:
 cp -r .claude/skills/greek-electricity-bill-analysis ~/.claude/skills/
 ```
 
