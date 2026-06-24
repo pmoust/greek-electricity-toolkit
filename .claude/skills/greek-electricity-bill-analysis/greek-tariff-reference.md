@@ -13,6 +13,16 @@ Snapshot researched **2026-06**. Floating rates reset monthly — re-verify on t
 
 **Provider marketing names don't always match the regulatory color** — verify the mechanism (is there an adjustment line?), not the brand label.
 
+## Strategy before price (don't compare across tiers)
+
+Floating, 1-year fixed and 2-year fixed are **different products on a risk axis**, not rival price points — ranking them in one list is apples-to-oranges. The decision order is:
+
+1. **Commit to a price or follow the market?** Fixed (Μπλε) locks a rate and removes monthly-reset risk; floating (Κίτρινο/Πράσινο) tracks wholesale and can be cheaper now but moves.
+2. **If fixed, for how long?** A multi-year lock (e.g. a 24-month tariff) is only "cheaper" if you'd actually hold it. In a volatile market (fuel/geopolitical shocks) a long lock carries opportunity risk if prices fall — and an early-exit fee if you leave. Treat **term length** as a first-class factor, not a footnote.
+3. **Then** rank cheapest-within-tier and compare the cheapest *floating* vs cheapest *1y-fixed* vs cheapest *2y-fixed* as three distinct choices.
+
+**Sample & seasonality:** a handful of bills (e.g. 6–8) can't show seasonal swings (summer A/C, winter heating). Don't annualise a short sample by naive scaling — it over/under-weights the season you captured. Use ≥12 consecutive months, or weight by season, and label coverage.
+
 ## Charge basis & who sets it
 
 | Line | Who | Basis | Changes w/ supplier | In VAT base |

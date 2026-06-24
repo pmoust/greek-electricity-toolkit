@@ -94,13 +94,51 @@ def tiered_effective_rate(kwh_month, tiers):
 
 def rank_offers(bills, offers):
     """Rank offers (dict name->offer) for a supply, cheapest first.
-    Returns list of (name, new_total, saving, pct)."""
+    Returns list of (name, new_total, saving, pct).
+    NOTE: a flat ranking mixes risk tiers. For a real recommendation rank WITHIN
+    a commitment tier (floating vs fixed-1y vs fixed-2y+) -- see rank_within_tiers."""
     rows = []
     for name, offer in offers.items():
         _, new, saving, pct = backtest_supply(bills, offer)
         rows.append((name, new, saving, pct))
     rows.sort(key=lambda r: r[1])
     return rows
+
+
+def commitment_tier(offer):
+    """Classify an offer on the risk/commitment axis.
+    Floating and fixed-of-different-terms are NOT interchangeable -- decide the
+    tier first, then compare price within it. Returns one of:
+    'floating', 'fixed-<=12m', 'fixed-13-24m', 'fixed->24m'."""
+    is_fixed = offer.get("color") == "Blue" or "fixed" in str(offer.get("type", "")) \
+        or not offer.get("adj_clause", True)
+    if not is_fixed:
+        return "floating"
+    months = 0
+    for tok in str(offer.get("contract", "")).replace("-", " ").split():
+        if tok.isdigit():
+            months = int(tok); break
+    if months == 0:
+        return "fixed-term?"
+    if months <= 12:
+        return "fixed-<=12m"
+    if months <= 24:
+        return "fixed-13-24m"
+    return "fixed->24m"
+
+
+def rank_within_tiers(bills, offers):
+    """Group offers by commitment tier and rank cheapest-first WITHIN each tier.
+    Returns {tier: [(name, new_total, saving, pct, term), ...]}. Pick your tier
+    (commit-to-a-price vs follow-the-market) first, then the cheapest in it."""
+    tiers = {}
+    for name, offer in offers.items():
+        _, new, saving, pct = backtest_supply(bills, offer)
+        tier = commitment_tier(offer)
+        tiers.setdefault(tier, []).append((name, new, saving, pct, offer.get("contract", "")))
+    for rows in tiers.values():
+        rows.sort(key=lambda r: r[1])
+    return tiers
 
 
 if __name__ == "__main__":
