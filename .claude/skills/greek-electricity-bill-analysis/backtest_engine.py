@@ -188,6 +188,77 @@ def rank_within_tiers(bills, offers):
     return tiers
 
 
+# Regulated reference rates (mid-2026; same as greek-tariff-reference.md). These are
+# provider-INDEPENDENT — single source of truth, shared with the example generator.
+REGULATED = {
+    "transmission_per_kwh": 0.01151,        # ADMIE
+    "distribution_per_kwh": 0.00339,        # DEDDIE energy part
+    "distribution_kva_year_resi": 6.21,     # DEDDIE capacity (residential)
+    "distribution_kva_year_business": 11.339,
+    "etmear_per_kwh": 0.017,
+    "yko_tiers_4mo": [(1600, 0.00699), (2000, 0.05), (None, 0.085)],  # per 4-month band
+    "efk_resi": 0.0022,
+    "efk_business": 0.005,
+    "ert_year": 36.0,
+}
+
+
+def yko_4mo(kwh_4mo):
+    """ΥΚΩ (public-service levy) cost for a 4-month period's kWh — tiered."""
+    return tiered_effective_rate(kwh_4mo, REGULATED["yko_tiers_4mo"]) * kwh_4mo if kwh_4mo else 0.0
+
+
+def regulated_charge(day_kwh, night_kwh, kva, days, business=False):
+    """Block B (ADMIE + DEDDIE + ETMEAR + YKO) for one period. Provider-independent."""
+    kwh = day_kwh + night_kwh
+    kva_rate = REGULATED["distribution_kva_year_business"] if business else REGULATED["distribution_kva_year_resi"]
+    transmission = kwh * REGULATED["transmission_per_kwh"]
+    distribution = kva * kva_rate * days / 365 + kwh * REGULATED["distribution_per_kwh"]
+    etmear = kwh * REGULATED["etmear_per_kwh"]
+    return transmission + distribution + etmear + yko_4mo(kwh)
+
+
+def annual_cost(offer, profile):
+    """All-in annual cost (€, incl. regulated + 6% VAT + municipal + ΕΡΤ) of an offer
+    at a REFERENCE consumption profile — a seasonally-weighted comparator that does not
+    rely on a short, unrepresentative bill sample.
+
+    profile = {
+      "periods": [{"day": kWh, "night": kWh, "days": N}, ...]  # e.g. three 4-month bands
+      "kva": 25, "business": False,
+      "municipal_eur_year": 60.0, "ert": True,
+    }
+    Night kWh is priced at the offer's night_rate when it has one, else the day rate
+    (so a dual-zone offer's value — and the gain from shifting load to night — shows up).
+    """
+    business = profile.get("business", False)
+    efk_rate = REGULATED["efk_business"] if business else REGULATED["efk_resi"]
+    rate_day = offer["energy_rate"]
+    rate_night = offer.get("night_rate") or offer["energy_rate"]
+    total = 0.0
+    for p in profile["periods"]:
+        day, night, days = p["day"], p.get("night", 0), p["days"]
+        A = offer["paygio"] * days / 30.0 + day * rate_day + night * rate_night
+        B = regulated_charge(day, night, profile["kva"], days, business)
+        efk = (day + night) * efk_rate
+        total += A + B + efk + VAT * (A + B + efk)
+    total += profile.get("municipal_eur_year", 0.0)
+    if profile.get("ert", True):
+        total += REGULATED["ert_year"]
+    return round(total, 2)
+
+
+def night_shift_saving(offer, profile, fraction):
+    """€/year saved by shifting `fraction` of day kWh to the night register (dual-zone
+    offers only). Returns 0 for single-register offers."""
+    if not offer.get("night_rate"):
+        return 0.0
+    shifted = {**profile, "periods": [
+        {"day": p["day"] * (1 - fraction), "night": p.get("night", 0) + p["day"] * fraction, "days": p["days"]}
+        for p in profile["periods"]]}
+    return round(annual_cost(offer, profile) - annual_cost(offer, shifted), 2)
+
+
 if __name__ == "__main__":
     # Worked example: the baseline trap. A ΗΡΩΝ PROTECT bill whose HEADLINE looks
     # like 0,0825 but whose EFFECTIVE rate (base+ritra-disc) is ~0,157.
