@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "last_verified": "2026-06-24",
+    "source_of_truth": "https://energycost.gr (RAAEY official comparison tool)",
+    "note": "Canonical current-offers dataset, maintained by .github/workflows/refresh-offers.yml (weekly agent -> PR -> human review). Energy rate = effective competitive (component A) €/kWh, after the on-time/direct-debit discount, ex regulated charges + VAT. Floating rates reset monthly — every figure carries a source + date; re-verify before relying."
+  },
+  "offers": [
+    {"id": "DEH_G1N", "provider": "ΔΕΗ", "product": "G1/G1N Οικιακό (night)", "color": "Green", "type": "floating-night", "segment": "resi-night", "energy_rate": 0.15394, "night_rate": 0.12313, "adj_clause": true, "paygio": 5.00, "contract": "none", "source": "https://www.dei.gr/en/home/electricity/g1-g1n/", "date": "2026-06-24"},
+    {"id": "DEH_ENTERTWO", "provider": "ΔΕΗ", "product": "myHome EnterTwo (fixed, dual-zone)", "color": "Blue", "type": "fixed-night", "segment": "resi-night", "energy_rate": 0.14500, "night_rate": 0.10500, "adj_clause": false, "paygio": 9.00, "contract": "24 months fixed", "source": "https://www.dei.gr/en/home/electricity/myhome-entertwo/", "date": "2026-06-24"},
+    {"id": "HERON_YELLOWFREE", "provider": "ΗΡΩΝ", "product": "Yellow Free Home (zero πάγιο)", "color": "Yellow", "type": "floating", "segment": "resi", "energy_rate": 0.134, "night_rate": null, "adj_clause": true, "paygio": 0.00, "contract": "none", "source": "https://www.heron.gr/", "date": "2026-06-24"},
+    {"id": "HERON_GENBUSS", "provider": "ΗΡΩΝ", "product": "Generous Business S (common areas)", "color": "Yellow", "type": "floating-business", "segment": "business", "energy_rate": 0.133, "night_rate": null, "adj_clause": true, "paygio": 5.50, "contract": "none", "source": "https://www.heron.gr/", "date": "2026-06-24"},
+    {"id": "ENERWAVE_SAVER", "provider": "Enerwave (ex-Elpedison)", "product": "Reward Saver (floating, no clause)", "color": "Yellow", "type": "floating", "segment": "resi", "energy_rate": 0.129, "night_rate": null, "adj_clause": false, "paygio": 7.90, "contract": "none", "source": "https://www.enerwave.gr/", "date": "2026-06-24"},
+    {"id": "ZENITH_FIX1Y", "provider": "Zenith", "product": "Power Home Fixed 1Y", "color": "Blue", "type": "fixed", "segment": "resi", "energy_rate": 0.129, "night_rate": null, "adj_clause": false, "paygio": 11.90, "contract": "12 months fixed", "source": "https://www.zenith.gr/", "date": "2026-06-24"},
+    {"id": "PROTERGIA_BRIGHT", "provider": "Protergia", "product": "Value Bright (floating)", "color": "Green", "type": "floating", "segment": "resi", "energy_rate": 0.13767, "night_rate": null, "adj_clause": true, "paygio": 5.00, "contract": "none", "source": "https://www.protergia.gr/el/pricesres/", "date": "2026-06-24"},
+    {"id": "ELIN_BUSGREEN", "provider": "ELIN/ELINOIL", "product": "Power On! Business Green (≤25 kVA)", "color": "Green", "type": "floating-business", "segment": "business", "energy_rate": 0.118, "night_rate": null, "adj_clause": true, "paygio": 0.00, "contract": "none", "source": "https://energy.elin.gr/", "date": "2026-06-24"}
+  ]
+}
