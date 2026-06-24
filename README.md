@@ -24,19 +24,43 @@ Given any Greek electricity bill (λογαριασμός ρεύματος) it le
 
 ## How to use the skill
 
-The skill lives in [`.claude/skills/greek-electricity-bill-analysis/`](.claude/skills/greek-electricity-bill-analysis/).
+The skill lives in [`.claude/skills/greek-electricity-bill-analysis/`](.claude/skills/greek-electricity-bill-analysis/). It's a [Claude Code](https://docs.claude.com/en/docs/claude-code) skill — three plain files (instructions + a Python script + a reference sheet), no install, no dependencies.
 
-**With Claude Code:** open this repo and just ask in plain language — the skill auto-activates on the right triggers:
+### 1. Make the skill discoverable
 
-> "Here's my electricity bill PDF. Am I overpaying, and what should I switch to?"
+Claude Code picks up skills from `.claude/skills/` in the **current project** and from `~/.claude/skills/` **globally**. So either:
 
-Claude will read `SKILL.md`, follow the method, and use the supporting files:
+```bash
+# Option A — use it only inside this repo: just run Claude Code here.
+cd greek-electricity-toolkit && claude
+
+# Option B — use it for any folder on your machine:
+cp -r .claude/skills/greek-electricity-bill-analysis ~/.claude/skills/
+```
+
+Confirm it loaded: in the session, `/skills` should list `greek-electricity-bill-analysis`.
+
+### 2. Give Claude the actual bills
+
+The skill reads bills with `pdftotext` (install `poppler` if you don't have it: `brew install poppler`). Put the PDFs somewhere Claude can read and point at them — paths, not vibes:
+
+> "Read my bills in `./bills/*.pdf` and tell me, per supply, what I actually pay and whether I should switch."
+
+Claude then follows `SKILL.md`: extract → reconcile each bill to the cent → split the one charge you control from the three you don't → compute the **effective** rate (with the hidden ρήτρα) → backtest alternatives.
+
+### 3. Feed it real offers (it won't invent them)
+
+This is the honest part: **the skill cannot know today's prices by itself.** Live rates reset monthly and aren't in the files. So either let Claude web-research current offers, or paste the rates you've collected, then it ranks them with `backtest_engine.py`. If you give it nothing, a good run will *tell you it needs the live numbers from energycost.gr* — it's built to refuse to fabricate a winner (that was the main bug we fixed).
+
+### What each file does
 - **`SKILL.md`** — the method: the four bill blocks, the effective-rate rule, the backtest formula, the market-comparison workflow, and the gotchas.
-- **`backtest_engine.py`** — runnable, dependency-free. Key functions:
-  - `backtest_bill(bill, offer)` → `(new_total, saving, pct)`
-  - `backtest_supply(bills, offer)` and `rank_offers(bills, offers)`
-  - `tiered_effective_rate(kwh_month, tiers)` for tiered products
+- **`backtest_engine.py`** — runnable, dependency-free. `backtest_bill(bill, offer)` → `(new_total, saving, pct)`; `backtest_supply(...)`, `rank_offers(...)`, and `tiered_effective_rate(kwh_month, tiers)`.
 - **`greek-tariff-reference.md`** — current rates (VAT, ΕΦΚ, ΕΤΜΕΑΡ, ΥΚΩ, distribution), RAAEY colors, night-tariff hours, the bill-reading cheatsheet, and the supplier list.
+
+### Honest limits
+- It needs **text-based** bill PDFs (ΔΕΗ/ΗΡΩΝ are; a scanned photo would need OCR first).
+- It produces a **decision-support estimate**, not a binding quote. Every floating rate must be re-checked on **[energycost.gr](https://energycost.gr)** and every contract's exit fee in its "Ειδικοί Όροι" before you sign.
+- Rates, VAT and ΕΦΚ in the reference are a **2026-06 snapshot** — they drift; verify.
 
 **Quick sanity check** (the trap, in one command):
 
@@ -46,7 +70,7 @@ python3 .claude/skills/greek-electricity-bill-analysis/backtest_engine.py
 # -> switching SAVES money, because the real ΗΡΩΝ rate embeds the ρήτρα.
 ```
 
-**What you still must verify yourself:** floating (Κίτρινο/Πράσινο) prices reset on the 1st of each month — confirm any rate on the official ΡΑΑΕΥ comparison tool **[energycost.gr](https://energycost.gr)** before signing, and confirm a business/κοινόχρηστα product actually accepts your meter.
+(And before signing anything: confirm a business/κοινόχρηστα product actually accepts your meter — the cheapest one may not.)
 
 ## What's in this repo
 
