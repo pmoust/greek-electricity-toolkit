@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_verified": "2026-06-24",
+    "last_verified": "2026-07-01",
     "source_of_truth": "https://energycost.gr (RAAEY official comparison tool)",
     "note": "Canonical current-offers dataset, maintained by .github/workflows/refresh-offers.yml (weekly agent -> PR -> human review). Energy rate = effective competitive (component A) €/kWh, after the on-time/direct-debit discount, ex regulated charges + VAT. Floating rates reset monthly — every figure carries a source + date; re-verify before relying. Optional fields: pricing_basis (fixed/green-monthly/index-prev-month/dynamic-hourly), gift_eur (+gift_conditions; volatile — first-year only), exit_fee_per_month, caveat."
   },
